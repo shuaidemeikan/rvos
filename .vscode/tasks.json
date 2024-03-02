@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "riscvbuild",
+            "type": "shell",
+            "isBackground": true,
+            //"command": "cd ${workspaceFolder}/;make clean;make vscodedebug",
+            "command" : "qemu-system-riscv32 -nographic -smp 1 -machine virt -bios none -kernel build/os.elf -s -S -drive file=${workspaceFolder}/test.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0",
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "beginsPattern": ".*-kernel build/os.elf -S -s",
+                        "endsPattern": "."
+                    }
+                }
+            ]
+        }
+    ]
+}
