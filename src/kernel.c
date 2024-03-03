@@ -13,6 +13,12 @@ extern void trap_init(void);
 extern void plic_init(void);
 extern void timer_init(void);
 extern void virtio_init();
+extern void byte_test();
+
+void test(void)
+{
+	byte_test();
+}
 
 void start_kernel(void)
 {
@@ -28,6 +34,8 @@ void start_kernel(void)
 	timer_init();
 
 	sched_init();
+
+	test();
 
 	os_main();
 

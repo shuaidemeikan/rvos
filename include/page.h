@@ -12,6 +12,43 @@
 #define PAGE_TAKEN (uint8_t)(1 << 0)
 #define PAGE_LAST  (uint8_t)(1 << 1)
 
+#define byte_alloc_digit digit if (size < digit)\
+	{\
+		memory_bin* curr = byte_alloclist->memdigit;\
+		while (curr->next != NULL)\
+		{\
+			if (curr->full == 0)\
+				return curr;\
+			else\
+				curr = curr->next;\
+		}\
+		for (int i = 0; i < 256; i++)\
+		{\
+			if (curr->exist[i] == 0)\
+			{\
+				curr->exist[i] = 1;\
+				curr->allcated_count++;\
+				if (curr->allcated_count == 256)\
+				{\
+					curr->full = 1;\
+					if (get_binisfull(byte_alloclist->memdigit) == NULL)\
+					{\
+						memory_bin* newbin = page_alloc(curr->page_size);\
+						newbin->page_size = (digit * 256) / 4096;\
+						newbin->start_addr = page_alloc(newbin->page_size);\
+						newbin->pre = curr;\
+						newbin->next = NULL;	\
+						newbin->full = 0;\
+						newbin->allcated_count = 0;\
+						addbintolink(curr, newbin);\
+						byte_alloclist->memdigit_count++;\
+					}\
+				}\
+				return curr->start_addr + i * digit;\
+			}\
+		}\
+	}\
+
 /*
  * Page Descriptor 
  * flags:
@@ -23,33 +60,27 @@ struct Page {
 };
 
 #pragma pack(1)
+
+typedef struct _memory_bin
+{
+	uint8_t exist[256];
+	void* start_addr;
+	uint16_t page_size;
+	struct _memory_bin* pre;
+	struct _memory_bin* next;
+	uint8_t full;
+	uint16_t allcated_count;
+}memory_bin;
+
 typedef struct _byte_memory
 {
-	void* start_addr;
-	uint16_t len;
-	uint16_t exist;
-	struct _byte_memory pre;
-	struct _byte_memory next;
-} byte_memory;
+	memory_bin* mem64;
+	uint16_t mem64_count;
+	memory_bin* mem128;
+	uint16_t mem128_count;
+}byte_memory;
+
 #pragma pack()
-
-static inline byte_memory* get_memblk(byte_memory* list, uint32_t list_len)
-{
-	byte_memory* curr = list;
-	for (int i = 0; i < list_len; i++)
-	{
-		if (list->exist == 0)
-			return curr;	
-		curr++;
-	}
-	return NULL;
-}
-
-static inline void del_memblk(byte_memory* node)
-{
-	node->exist = 0;
-	
-}
 
 static inline void _clear(struct Page *page)
 {
@@ -88,9 +119,52 @@ static inline uint32_t _align_page(uint32_t address)
 	return (address + order) & (~order);
 }
 
-void page_init();
-void *page_alloc(int npages);
-void page_free(void *p);
-void page_test();
+static inline memory_bin* get_binisfull(memory_bin* bin)
+{
+	while (bin != NULL)
+	{
+		if (bin->full == 0)
+			return bin;
+		else
+			bin = bin->next;
+	}
+	return NULL;
+}
+
+static inline void addbintolink(memory_bin* link, memory_bin* bin)
+{
+	if (link->next == NULL)
+	{
+		link->next = bin;
+		bin->pre = link;
+		bin->next = NULL;
+	}else
+	{
+		link->next->pre = bin;
+		bin->next = link->next;
+		bin->pre = link;
+		link->next = bin;
+	}
+}
+
+static inline void free_bin(memory_bin* bin)
+{
+	if (bin->pre == NULL)
+		return;
+	if (bin->next == NULL)
+	{
+		bin->pre->next = NULL;
+		for (int i = 0; i < bin->page_size; i++)
+			page_free(bin->start_addr + i * PAGE_SIZE);
+		page_free(bin);
+	}else
+	{
+		bin->pre->next = bin->next;
+		bin->next->pre = bin->pre;
+		for (int i = 0; i < bin->page_size; i++)
+			page_free(bin->start_addr + i * PAGE_SIZE);
+		page_free(bin);
+	}
+}
 
 #endif
