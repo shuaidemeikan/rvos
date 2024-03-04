@@ -23,7 +23,7 @@ static uint32_t _alloc_start = 0;
 static uint32_t _alloc_end = 0;
 static uint32_t _num_pages = 0;
 
-static byte_memory* byte_alloclist;
+
 
 // static byte_memory* byte_allocfraglist;
 // static uint32_t byte_allocfrag_maxnum = 4096; 
@@ -61,18 +61,10 @@ void page_init()
 	bin64->next = NULL;	
 	bin64->full = 0;
 	bin64->allcated_count = 0;
-	memory_bin* bin128 = (memory_bin*)page_alloc(1);
-	bin128->page_size = (128 * 256) / 4096;
-	bin128->start_addr = page_alloc(bin128->page_size);
-	bin128->pre = NULL;
-	bin128->next = NULL;	
-	bin128->full = 0;
-	bin128->allcated_count = 0;
+	bin64->tmp = 0;
 	byte_alloclist = (byte_memory*)page_alloc(1);
 	byte_alloclist->mem64 = bin64;
-	byte_alloclist->mem128 = bin128;
 	byte_alloclist->mem64_count = 0;
-	byte_alloclist->mem128_count = 0;
 }
 
 /*
@@ -149,48 +141,25 @@ void page_free(void *p)
 
 void* byte_alloc(size_t size)
 {
-	if (size < 64)
+	uint32_t count = (size / 64) + 1;
+	memory_bin* curr = get_avabin(byte_alloclist->mem64, count);
+	for (uint32_t i = curr->tmp; i < curr->tmp + count; i++)
 	{
-		memory_bin* curr = byte_alloclist->mem64;
-		// 拿到第一个还有空位的bin
-		// 这里理论存在两个情况，分别是找到一个有空位的bin和所有链上的bin都没有空位
-		// 但是实际上第二种情况不会出现，因为当一个链满了的时候，我们会实时的给他分配一个新的bins
-		while (curr->next != NULL)
+		curr->info[i].exist = 1;
+		if (i == curr->tmp +count - 1)
+			curr->info[i].alloc_end = 1;
+		curr->allcated_count++;
+		if (curr->allcated_count == 256)
 		{
-			if (curr->full == 0)
-				return curr;
-			else
-				curr = curr->next;
-		}
-		// 找到空位的那一项
-		for (int i = 0; i < 256; i++)
-		{
-			if (curr->exist[i] == 0)
-			{
-				curr->exist[i] = 1;
-				curr->allcated_count++;
-				if (curr->allcated_count == 256)
-				{
-					// 当前的bin里的256个空间全部被使用了
-					curr->full = 1;
-					if (get_binisfull(byte_alloclist->mem64) == NULL)
-					{	// 如果整条链上都没有可使用的空间了，那么就要申请一个新的bin
-						memory_bin* newbin = page_alloc(curr->page_size);
-						newbin->page_size = (64 * 256) / 4096;
-						newbin->start_addr = page_alloc(newbin->page_size);
-						newbin->pre = curr;
-						newbin->next = NULL;	
-						newbin->full = 0;
-						newbin->allcated_count = 0;
-						addbintolink(curr, newbin);
-						byte_alloclist->mem64_count++;
-					}
-				}
-				return curr->start_addr + i * 64;
+			// 当前的bin里的256个空间全部被使用了
+			curr->full = 1;
+			if (get_binisfull(byte_alloclist->mem64) == NULL)
+			{	// 如果整条链上都没有可使用的空间了，那么就要申请一个新的bin
+				addbintolink(curr);
 			}
 		}
 	}
-	return NULL;
+	return curr->start_addr + curr->tmp * 64;
 }
 
 void byte_free(void* p)
@@ -212,8 +181,14 @@ void byte_free(void* p)
 		{
 			if (curr->start_addr + i * 64 == p)
 			{
-				curr->exist[i] = 0;
-				curr->allcated_count--;
+				int count = 0;
+				do
+				{
+					curr->info[i + count].exist = 0;
+					count++;
+					curr->allcated_count--;
+				} while (curr->info[i + count].alloc_end == 0);	
+				curr->info[i + count].alloc_end = 0;
 				if (curr->allcated_count == 0)
 				{
 					// 分配完了，把这个bin和bin占用的page回收
@@ -245,8 +220,8 @@ void byte_test()
 {
 	for (int i = 0; i < 256; i++)
 	{
-		byte_alloc(sizeof(int));
+		byte_alloc(sizeof(int) * 4 * 8);
 	}
-	void* tmp = byte_alloc(sizeof(int));
+	void* tmp = byte_alloc(sizeof(int) * 4 * 8);
 	byte_free(tmp);
 }

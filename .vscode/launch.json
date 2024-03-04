@@ -29,7 +29,7 @@
                 }
             ],
             "miDebuggerPath": "/usr/bin/gdb-multiarch",
-            "miDebuggerServerAddress" : "172.27.236.120:1234"
+            "miDebuggerServerAddress" : "127.0.0.1:1234"
         }
         
 
