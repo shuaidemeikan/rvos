@@ -4,6 +4,7 @@
 #include "riscv.h"
 #include "printf.h"
 #include "platform.h"
+#include "page.h"
 
 #define MAX_TASKS 10
 #define STACK_SIZE 1024
@@ -48,10 +49,23 @@ struct context {
 	reg_t pc; // offset: 31 *4 = 124
 };
 
+typedef struct _task_struct
+{
+    uint32_t state;          // 0就绪，1正在运行，2阻塞
+    uint32_t counter;       // 时间片计数
+    uint32_t priority;      // 优先级
+    uint32_t exit_code;     // 进程执行停止的退出码，父进程会取
+    uint32_t pid;           // 进程号
+    uint32_t father;        // 父进程号
+    uint32_t tty;           // 可能有用，进程使用的tty设备号
+    struct context tss;     // 进程的寄存器信息
+    // 还应该有文件系统的东西，ss暂时没做
+}task_struct;
+
 void sched_init();
 void schedule();
 int task_create(void (*start_routin)(void));
 void task_yield();
 void task_delay(volatile int count);
-
+void init_progress();
 #endif // !_SCHED_H

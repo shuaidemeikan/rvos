@@ -21,6 +21,11 @@ int memcmp(const void *ptr1, const void *ptr2, size_t num)
 void* memset(void *s, int c, size_t n)
 {
     for (int i = 0; i < n; i++)
-        ((int*)s)[i] = c;
+        ((char*)s)[i] = (char)c;
     return s;
+}
+
+void ptr2uint(uint32_t* target, void* ptr)
+{
+    memcpy(target, ptr, sizeof(uint32_t));
 }

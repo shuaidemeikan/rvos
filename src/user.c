@@ -1,7 +1,7 @@
 #include "os.h"
 
 #include "user_api.h"
-
+#include "sched.h"
 #define DELAY 4000
 
 void user_task0(void)
@@ -46,7 +46,8 @@ void user_task1(void)
 /* NOTICE: DON'T LOOP INFINITELY IN main() */
 void os_main(void)
 {
-	task_create(user_task0);
-	task_create(user_task1);
+	init_progress();
+	// task_create(user_task0);
+	// task_create(user_task1);
 }
 

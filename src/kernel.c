@@ -14,6 +14,7 @@ extern void plic_init(void);
 extern void timer_init(void);
 extern void virtio_init();
 extern void byte_test();
+extern void mempage_init();
 
 void test(void)
 {
@@ -36,6 +37,8 @@ void start_kernel(void)
 	sched_init();
 
 	test();
+
+	mempage_init();
 
 	os_main();
 

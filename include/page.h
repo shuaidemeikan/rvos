@@ -14,6 +14,8 @@
 
 void *page_alloc(int npages);
 void page_free(void *p);
+void* byte_alloc(size_t size);
+void byte_free(void* p);
 
 /*
  * Page Descriptor 
@@ -50,6 +52,7 @@ typedef struct _byte_memory
 	memory_bin* mem64;
 	uint16_t mem64_count;
 }byte_memory;
+
 
 #pragma pack()
 

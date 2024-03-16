@@ -10,6 +10,11 @@ extern void switch_to(struct context *next);
 uint8_t __attribute__((aligned(16))) task_stack[MAX_TASKS][STACK_SIZE];
 struct context ctx_tasks[MAX_TASKS];
 
+// 就绪队列
+task_struct ready_task[MAX_TASKS];
+// 当前进行
+task_struct cur_task = {.pid = -1};
+
 /*
  * _top is used to mark the max available position of ctx_tasks
  * _current is used to point to the context of current task
@@ -35,8 +40,24 @@ void schedule()
 		return;
 	}
 
+	// 判断是否需要切
+	// 创建0进程时，无需判断
+	if (cur_task.pid == -1)
+	{
+		cur_task = ready_task[0];
+		goto sw;
+	}
+	// 判断时间片是否耗尽
+	cur_task.counter--;
+	if (cur_task.counter <= 0)
+		goto sw;
+	
+	return;
+	
+sw:
 	_current = (_current + 1) % _top;
-	struct context *next = &(ctx_tasks[_current]);
+	cur_task = ready_task[_current];
+	struct context *next = &(cur_task.tss);
 	switch_to(next);
 }
 
@@ -81,3 +102,51 @@ void task_delay(volatile int count)
 	while (count--);
 }
 
+static void progress0()
+{
+	while (1)
+	{
+		printf("hello progress0\n");
+		task_delay(4000);
+	}
+}
+
+static void progress1()
+{
+   	while (1)
+	{
+		printf("hello progress1\n");
+		task_delay(4000);
+	}
+}
+
+// 初始化进程，目前是创建0号进程
+void init_progress()
+{
+    task_struct* task0 = (task_struct*)byte_alloc(sizeof(task_struct*));
+    task0->pid = 0;
+    task0->counter = 10;
+    task0->exit_code = 0;
+    task0->father = -1;
+    task0->priority = 0;
+    task0->state = 0;
+    task0->tty = 0;
+    task0->tss.sp = byte_alloc(1024);
+    task0->tss.pc = progress0;
+	ready_task[_top] = *task0;
+	_top++;
+
+
+	task_struct* task01 = (task_struct*)byte_alloc(sizeof(task_struct*));
+    task01->pid = 1;
+    task01->counter = 10;
+    task01->exit_code = 0;
+    task01->father = -1;
+    task01->priority = 0;
+    task01->state = 0;
+    task01->tty = 0;
+    task01->tss.sp = byte_alloc(1024);
+    task01->tss.pc = progress1;
+	ready_task[_top] = *task01;
+	_top++;
+}

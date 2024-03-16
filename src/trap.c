@@ -69,6 +69,10 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 			do_syscall(cxt);
 			return_pc += 4;
 			break;
+		case 12:
+			uart_puts("Instruction page fault\n");
+			printf("virtual addr: %d\n", r_stval());
+			break;
 		default:
 			panic("OOPS! What can I do!");
 			//return_pc += 4;

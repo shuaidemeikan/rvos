@@ -46,6 +46,18 @@ static inline void w_mstatus(reg_t x)
 	asm volatile("csrw mstatus, %0" : : "r" (x));
 }
 
+static inline reg_t r_satp()
+{
+	reg_t x;
+	asm volatile("csrr %0, satp" : "=r" (x) );
+	return x;	
+}
+
+static inline void w_satp(reg_t x)
+{
+	asm volatile("csrw satp, %0" : : "r" (x));
+}
+
 /*
  * machine exception program counter, holds the
  * instruction address to which a return from
@@ -60,6 +72,13 @@ static inline reg_t r_mepc()
 {
 	reg_t x;
 	asm volatile("csrr %0, mepc" : "=r" (x));
+	return x;
+}
+
+static inline reg_t r_stval()
+{
+	reg_t x;
+	asm volatile("csrr %0, stval" : "=r" (x));
 	return x;
 }
 

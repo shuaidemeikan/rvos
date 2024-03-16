@@ -57,8 +57,11 @@ _start:
 	# specification: interrupts for M-mode, which is higher than U-mode, are
 	# always globally enabled regardless of the setting of the global MIE bit.
 	# So finally we simply reset t0 to zero.
-	li	t0, 0
+	# 将mpp设置0，这样当mret返回后系统就会进入用户模式，不需要管mpie，因为m模式的中断会默认无视mie位而全局启用
+	li	t0, 1 << 11
 #else
+	# 设置mstatus.mpp=3，这样整个操作系统就不存在u模式了，所有程序都运行在m模式下
+	# 设置statis.mpie=1，这样mret返回后就会启用中断
 	# Set mstatus.MPP to 3, so we still run in Machine mode after MRET.
 	# Set mstatus.MPIE to 1, so MRET will enable the interrupt.
 	li	t0, 3 << 11 | 1 << 7
