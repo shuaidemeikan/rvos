@@ -42,10 +42,10 @@ _start:
 	# https://gitee.com/unicornx/riscv-operating-system-mooc/issues/I441IC (in chinese)
 	# So it's just a temporary workaround till now to not block people who
 	# want to try newer qemu (>= 6.0).
-	li      t0, 0xffffffff
-	csrw    pmpaddr0, t0
-	li      t0, 0xf
-	csrw    pmpcfg0, t0
+	# li      t0, 0xffffffff
+	# csrw    pmpaddr0, t0
+	# li      t0, 0xf
+	# csrw    pmpcfg0, t0
 #endif
 
 	# At the end of start_kernel, schedule() will call MRET to switch

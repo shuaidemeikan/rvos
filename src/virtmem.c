@@ -4,8 +4,8 @@ void mempage_init()
 {
     // 初始化0号进程的页表
     // 目前只支持128M的内存，一个一级页表只能管理4M的内存，所以需要32个一级页表
-    //mempage* task0_firstpage =  (mempage*)((uint32_t)page_alloc(2) + 2048);
-    mempage* task0_firstpage =  (mempage*)((uint32_t)page_alloc(2));
+    mempage* task0_firstpage =  (mempage*)((uint32_t)page_alloc(2) + 2048);
+    //mempage* task0_firstpage =  (mempage*)((uint32_t)page_alloc(2));
     // 有32个一级页表，一个一级页表有1024个二级页表项，所以二级页表需要的总空间为
     // 32 * 1024 * 32
     mempage* task0_secpage = (mempage*)page_alloc(256);
@@ -21,8 +21,8 @@ void mempage_init()
         task0_firstpage[i].X = 0;
         task0_firstpage[i].U = 0;
         task0_firstpage[i].G = 0;
-        task0_firstpage[i].A = 0;
-        task0_firstpage[i].D = 0;
+        task0_firstpage[i].A = 1;
+        task0_firstpage[i].D = 1;
         task0_firstpage[i].RSW = 0;
     }
 
@@ -37,15 +37,15 @@ void mempage_init()
         task0_firstpage[i].X = 1;
         task0_firstpage[i].U = 0;
         task0_firstpage[i].G = 0;
-        task0_firstpage[i].A = 0;
-        task0_firstpage[i].D = 0;
+        task0_firstpage[i].A = 1;
+        task0_firstpage[i].D = 1;
         task0_firstpage[i].RSW = 0; 
     }
 
     // 开启分页
     // ASID字段好像是优化用的，但是不管也行
     reg_t tmp = 0;
-    //tmp = tmp | 1U << 31 | ((((uint32_t)task0_firstpage - 0x800) / 4096) & 0x3FFFFF);
-    tmp = tmp | 1U << 31 | ((((uint32_t)task0_firstpage) / 4096) & 0x3FFFFF);
+    tmp = tmp | 1U << 31 | ((((uint32_t)task0_firstpage - 0x800) / 4096) & 0x3FFFFF);
+    //tmp = tmp | 1U << 31 | ((((uint32_t)task0_firstpage) / 4096) & 0x3FFFFF);
     w_satp(tmp);
 }

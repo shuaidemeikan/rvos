@@ -6,7 +6,7 @@
             "type": "shell",
             "isBackground": true,
             //"command": "cd ${workspaceFolder}/;make clean;make vscodedebug",
-            "command" : "qemu-system-riscv32 -nographic -smp 1 -machine virt -bios none -kernel build/os.elf -s -S -drive file=${workspaceFolder}/test.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0",
+            "command" : "qemu-system-riscv32 -nographic -smp 1 -machine virt -bios none -cpu rv32,pmp=false -kernel build/os.elf -s -S -drive file=${workspaceFolder}/test.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0",
             "problemMatcher": [
                 {
                     "pattern": [

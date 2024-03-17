@@ -82,6 +82,13 @@ static inline reg_t r_stval()
 	return x;
 }
 
+static inline reg_t r_sepc()
+{
+	reg_t x;
+	asm volatile("csrr %0, sepc" : "=r" (x));
+	return x;
+}
+
 /* Machine Scratch register, for early trap handler */
 static inline void w_mscratch(reg_t x)
 {

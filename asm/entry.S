@@ -137,6 +137,7 @@ switch_to:
 	# set mepc to the pc of the next task
 	lw	a1, 124(a0)
 	csrw	mepc, a1
+	csrw	sepc, a1
 
 	# Restore all GP registers
 	# Use t6 to point to the context of the new task

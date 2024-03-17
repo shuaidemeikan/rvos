@@ -13,7 +13,8 @@
         "trap.h": "c",
         "executor": "c",
         "memtools.h": "c",
-        "user_api.h": "c"
+        "user_api.h": "c",
+        "virtmem.h": "c"
     },
     "cmake.configureOnOpen": true
 }

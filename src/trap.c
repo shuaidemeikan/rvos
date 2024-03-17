@@ -72,6 +72,11 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 		case 12:
 			uart_puts("Instruction page fault\n");
 			printf("virtual addr: %d\n", r_stval());
+			printf("sepc = : %d\n", r_sepc());	
+			break;
+		case 2:
+			uart_puts("Illegal instruction\n");
+			printf("virtual addr: %d\n", r_stval());
 			break;
 		default:
 			panic("OOPS! What can I do!");
