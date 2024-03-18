@@ -25,27 +25,27 @@ void mempage_init()
         task0_firstpage[i].D = 1;
         task0_firstpage[i].RSW = 0;
     }
+    //task0_firstpage[0].PPN = 0x80000000 / 4096;
 
     // 初始化二级页表
     for (int i = 0; i < 1024 * 32; i++)
     {
         task0_secpage[i].PPN = (0x80000000 + i * 4096) / 4096;
         // task0的页表比较特殊，这里假设它所有页表项都可读写执行
-        task0_firstpage[i].V = 1;
-        task0_firstpage[i].R = 1;
-        task0_firstpage[i].W = 0;
-        task0_firstpage[i].X = 1;
-        task0_firstpage[i].U = 0;
-        task0_firstpage[i].G = 0;
-        task0_firstpage[i].A = 1;
-        task0_firstpage[i].D = 1;
-        task0_firstpage[i].RSW = 0; 
+        task0_secpage[i].V = 1;
+        task0_secpage[i].R = 1;
+        task0_secpage[i].W = 1;
+        task0_secpage[i].X = 1;
+        task0_secpage[i].U = 0;
+        task0_secpage[i].G = 0;
+        task0_secpage[i].A = 1;
+        task0_secpage[i].D = 1;
+        task0_secpage[i].RSW = 0; 
     }
 
     // 开启分页
     // ASID字段好像是优化用的，但是不管也行
     reg_t tmp = 0;
-    tmp = tmp | 1U << 31 | ((((uint32_t)task0_firstpage - 0x800) / 4096) & 0x3FFFFF);
-    //tmp = tmp | 1U << 31 | ((((uint32_t)task0_firstpage) / 4096) & 0x3FFFFF);
+    tmp = tmp | 1U << 31 | ((((uint32_t)task0_firstpage - 2048) / 4096) & 0x3FFFFF);
     w_satp(tmp);
 }
