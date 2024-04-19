@@ -30,6 +30,14 @@ void external_interrupt_handler()
 
 reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 {
+	// 进入中断/异常处理程序，需要先保存上下文
+	// 因为可能是会导致切换的中断，如果发生切换，那么就需要发生中断前上下文了
+	// extern task_struct cur_task;
+	// save_context(&(cur_task.tss));
+	// cur_task.tss.pc = r_mepc;
+
+	extern int curr_pri;
+	curr_pri = 11;
 	reg_t return_pc = epc;
 	reg_t cause_code = cause & 0xfff;
 	
@@ -62,15 +70,15 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 		}
 	} else {
 		/* Synchronous trap - exception */
-		printf("Sync exceptions!, code = %d\n", cause_code);
+		//printf("Sync exceptions!, code = %d\n", cause_code);
 		switch (cause_code) {
 		case 8:
-			uart_puts("System call from U-mode!\n");
+			//uart_puts("System call from U-mode!\n");
 			do_syscall(cxt);
 			return_pc += 4;
 			break;
 		case 9:
-			uart_puts("System call from S-mode!\n");
+			//uart_puts("System call from S-mode!\n");
 			do_syscall(cxt);
 			return_pc += 4;
 			break;
@@ -88,7 +96,7 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 			//return_pc += 4;
 		}
 	}
-
+	curr_pri = 01;
 	return return_pc;
 }
 

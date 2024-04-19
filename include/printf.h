@@ -9,4 +9,6 @@
 int printf(const char* s, ...);
 void panic(char *s);
 
+extern void sysprintf(char* str);
+
 #endif 

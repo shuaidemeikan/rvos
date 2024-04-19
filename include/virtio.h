@@ -47,6 +47,21 @@
 
 #define VIRIOBLK_NUM    256         // 描述符表项数
 
+// desc的flags
+#define VIRTQ_DESC_F_NEXT   1                   // 后面还有描述符表
+#define VIRTQ_DESC_F_WRITE     2                // 表示这块内存对于设备的权限是write-only
+#define VIRTQ_DESC_F_INDIRECT   4               // 没搞懂是干什么的
+
+// virtio操作码
+#define VIRTIO_BLK_T_IN                 0               // 读
+#define VIRTIO_BLK_T_OUT                1               // 写
+#define VIRTIO_BLK_T_FLUSH              4 
+#define VIRTIO_BLK_T_GET_ID             8 
+#define VIRTIO_BLK_T_GET_LIFETIME       10 
+#define VIRTIO_BLK_T_DISCARD            11 
+#define VIRTIO_BLK_T_WRITE_ZEROES       13 
+#define VIRTIO_BLK_T_SECURE_ERASE       14
+
 #pragma pack(1)
 typedef struct _virtio_blk_config 
 {
@@ -93,6 +108,12 @@ typedef struct _virtq_used {
         uint16_t idx;
         struct _virtq_used_elem ring[ /* Queue Size */];
 }virtq_used;
+
+typedef struct _virtio_blk_req {
+    uint32_t type; // 操作类型
+    uint32_t reserved;
+    uint64_t sector; // 读取的起始扇区号
+}virtio_blk_req;
 
 #pragma pack()
 

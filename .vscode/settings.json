@@ -14,7 +14,9 @@
         "executor": "c",
         "memtools.h": "c",
         "user_api.h": "c",
-        "virtmem.h": "c"
+        "virtmem.h": "c",
+        "virtio.h": "c",
+        "page.h": "c"
     },
     "cmake.configureOnOpen": true
 }

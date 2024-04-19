@@ -7,6 +7,7 @@
 #include "sched.h"
 #include "riscv.h"
 #include "plic.h"
+#include "sched.h"
 
 void trap_init();
 void external_interrupt_handler();

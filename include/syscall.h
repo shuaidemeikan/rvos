@@ -8,6 +8,7 @@
 
 
 #define SYS_gethid	1
+#define SYS_printf  2
 
 int sys_gethid(unsigned int *ptr_hid);
 void do_syscall(struct context *cxt);

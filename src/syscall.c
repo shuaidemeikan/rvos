@@ -19,6 +19,10 @@ void do_syscall(struct context *cxt)
 	case SYS_gethid:
 		cxt->a0 = sys_gethid((unsigned int *)(cxt->a0));
 		break;
+	case SYS_printf:
+		char* str = cxt->a0;
+		uart_puts(str);
+		break;
 	default:
 		printf("Unknown syscall no: %d\n", syscall_num);
 		cxt->a0 = -1;

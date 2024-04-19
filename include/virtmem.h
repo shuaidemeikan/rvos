@@ -26,5 +26,7 @@ typedef struct _mempage
 #pragma pack()
 
 void mempage_init();
+mempage *fork_mempage(mempage *src_firstpage, void* func_addr);
+void set_mempage(mempage *page);
 
 #endif 

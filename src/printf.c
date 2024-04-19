@@ -106,6 +106,7 @@ static int _vsnprintf(char * out, size_t n, const char* s, va_list vl)
 }
 
 static char out_buf[1000]; // buffer for _vprintf()
+static char smode_out_buf[1000];
 
 static int _vprintf(const char* s, va_list vl)
 {
@@ -114,8 +115,19 @@ static int _vprintf(const char* s, va_list vl)
 		uart_puts("error: output string size overflow\n");
 		while(1) {}
 	}
-	_vsnprintf(out_buf, res + 1, s, vl);
-	uart_puts(out_buf);
+	extern int curr_pri;
+	if (curr_pri == 11)
+	{
+		_vsnprintf(out_buf, res + 1, s, vl);
+		uart_puts(out_buf);
+	}
+	else if (curr_pri == 01)
+	{
+		_vsnprintf(smode_out_buf, res + 1, s, vl);
+		sysprintf(smode_out_buf);
+	}
+		
+	
 	return res;
 }
 

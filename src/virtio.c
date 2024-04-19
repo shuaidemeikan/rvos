@@ -4,6 +4,42 @@ virtq_desc* virtio_blk_desc;
 virtq_avail* virtio_blk_avail;
 virtq_used* virtio_blk_used;
 
+struct Page* desc_ava;
+
+static inline virtq_desc* alloc_desc()
+{
+    for (int i = 0; i < 256; i++)
+    {
+        if (_is_free(desc_ava + i))
+            return virtio_blk_desc + i;
+    }
+    return NULL;
+}
+
+static inline void blk_read(uint32_t sector, void* addr, size_t len, void* status)
+{
+    virtio_blk_req* req = page_alloc(1);
+    req->type = VIRTIO_BLK_T_IN;
+    req->sector = sector;
+    virtq_desc* first_desc = alloc_desc();
+    first_desc->addr = req;
+    first_desc->len = sizeof(virtio_blk_req);
+    first_desc->flags = VIRTQ_DESC_F_NEXT;
+    virtq_desc* sec_desc = alloc_desc();
+    sec_desc->addr = addr;
+    sec_desc->len = len;
+    sec_desc->flags = VIRTQ_DESC_F_NEXT | VIRTQ_DESC_F_WRITE;
+    virtq_desc* th_desc = alloc_desc();
+    th_desc->addr = status;
+    th_desc->len = sizeof(uint8_t);
+    th_desc->flags = VIRTQ_DESC_F_WRITE;
+
+    first_desc->next = sec_desc;
+    sec_desc->next= th_desc;
+
+    
+}
+
 static inline uint64_t read_device_features()
 {
     uint64_t fea;

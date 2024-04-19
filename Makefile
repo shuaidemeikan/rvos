@@ -39,7 +39,7 @@ debug: all
 	@echo "Press Ctrl-C and then input 'quit' to exit GDB and QEMU"
 	@echo "-------------------------------------------------------"
 	@${QEMU} ${QFLAGS} -kernel build/os.elf -s -S &
-	@${GDB} build/os.elf -q -x ../gdbinit
+	@${GDB} build/os.elf -q -x ./assist_file/gdbinit
 
 vscodedebug: all
 	@echo "Press Ctrl-C and then input 'quit' to exit GDB and QEMU"

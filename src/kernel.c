@@ -16,6 +16,8 @@ extern void virtio_init();
 extern void byte_test();
 extern void mempage_init();
 
+uint32_t curr_pri = 11;
+
 void test(void)
 {
 	byte_test();

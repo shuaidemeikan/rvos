@@ -94,6 +94,10 @@
 # the trap vector base address must always be aligned on a 4-byte boundary
 .balign 4
 trap_vector:
+
+	
+
+
 	# save context(registers).
 	csrrw	t6, mscratch, t6	# swap t6 and mscratch
 	reg_save t6

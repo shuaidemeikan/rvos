@@ -55,9 +55,14 @@ void schedule()
 	return;
 	
 sw:
+	// 先保存当前的寄存器数据到tss中
+	// save_context(&(cur_task.tss));
+
 	_current = (_current + 1) % _top;
 	cur_task = ready_task[_current];
 	struct context *next = &(cur_task.tss);
+	extern int curr_pri;
+	curr_pri = 01;
 	switch_to(next);
 }
 
@@ -69,17 +74,17 @@ sw:
  * 	0: success
  * 	-1: if error occured
  */
-int task_create(void (*start_routin)(void))
-{
-	if (_top < MAX_TASKS) {
-		ctx_tasks[_top].sp = (reg_t) &task_stack[_top][STACK_SIZE];
-		ctx_tasks[_top].pc = (reg_t) start_routin;
-		_top++;
-		return 0;
-	} else {
-		return -1;
-	}
-}
+// int task_create(void (*start_routin)(void))
+// {
+// 	if (_top < MAX_TASKS) {
+// 		ctx_tasks[_top].sp = (reg_t) &task_stack[_top][STACK_SIZE];
+// 		ctx_tasks[_top].pc = (reg_t) start_routin;
+// 		_top++;
+// 		return 0;
+// 	} else {
+// 		return -1;
+// 	}
+// }
 
 /*
  * DESCRIPTION
@@ -106,8 +111,21 @@ static void progress0()
 {
 	while (1)
 	{
-		printf("hello progress0\n");
+		printf("hello1 progress0\n");
 		task_delay(4000);
+		printf("hello2 progress0\n");
+		task_delay(4000);
+		printf("hello3 progress0\n");
+		task_delay(4000);
+		printf("hello4 progress0\n");
+		task_delay(4000);
+		printf("hello5 progress0\n");
+		task_delay(4000);
+		printf("hello6 progress0\n");
+		task_delay(4000);
+		printf("hello7 progress0\n");
+		task_delay(4000);
+
 	}
 }
 
@@ -115,7 +133,21 @@ static void progress1()
 {
    	while (1)
 	{
-		printf("hello progress1\n");
+		printf("hello1 progress1\n");
+		task_delay(4000);
+		printf("hello2 progress1\n");
+		task_delay(4000);
+		printf("hello3 progress1\n");
+		task_delay(4000);
+		printf("hello4 progress1\n");
+		task_delay(4000);
+		printf("hello5 progress1\n");
+		task_delay(4000);
+		printf("hello6 progress1\n");
+		task_delay(4000);
+		printf("hello7 progress1\n");
+		task_delay(4000);
+		printf("hello8 progress1\n");
 		task_delay(4000);
 	}
 }
@@ -125,7 +157,7 @@ void init_progress()
 {
     task_struct* task0 = (task_struct*)byte_alloc(sizeof(task_struct*));
     task0->pid = 0;
-    task0->counter = 10;
+    task0->counter = 5;
     task0->exit_code = 0;
     task0->father = -1;
     task0->priority = 0;
@@ -139,7 +171,7 @@ void init_progress()
 
 	task_struct* task01 = (task_struct*)byte_alloc(sizeof(task_struct*));
     task01->pid = 1;
-    task01->counter = 10;
+    task01->counter = 5;
     task01->exit_code = 0;
     task01->father = -1;
     task01->priority = 0;
@@ -149,4 +181,16 @@ void init_progress()
     task01->tss.pc = progress1;
 	ready_task[_top] = *task01;
 	_top++;
+}
+
+int task_create(void* start_routin, uint32_t counter, uint32_t priority, uint32_t tty)
+{
+	if (_top < MAX_TASKS) {
+		ctx_tasks[_top].sp = byte_alloc(1024);
+		ctx_tasks[_top].pc = start_routin;
+		_top++;
+		return 0;
+	} else {
+		return -1;
+	}
 }
