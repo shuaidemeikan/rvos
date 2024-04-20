@@ -64,46 +64,29 @@ typedef struct _task_struct
     // 还应该有文件系统的东西，ss暂时没做
 }task_struct;
 
-static inline void save_context(struct context *ctx) {
-    asm volatile (
-        "sw ra, 0(%0) \n"
-        "sw sp, 4(%0) \n"
-        "sw gp, 8(%0) \n"
-        "sw tp, 12(%0) \n"
-        "sw t0, 16(%0) \n"
-        "sw t1, 20(%0) \n"
-        "sw t2, 24(%0) \n"
-        "sw s0, 28(%0) \n"
-        "sw s1, 32(%0) \n"
-        "sw a0, 36(%0) \n"
-        "sw a1, 40(%0) \n"
-        "sw a2, 44(%0) \n"
-        "sw a3, 48(%0) \n"
-        "sw a4, 52(%0) \n"
-        "sw a5, 56(%0) \n"
-        "sw a6, 60(%0) \n"
-        "sw a7, 64(%0) \n"
-        "sw s2, 68(%0) \n"
-        "sw s3, 72(%0) \n"
-        "sw s4, 76(%0) \n"
-        "sw s5, 80(%0) \n"
-        "sw s6, 84(%0) \n"
-        "sw s7, 88(%0) \n"
-        "sw s8, 92(%0) \n"
-        "sw s9, 96(%0) \n"
-        "sw s10, 100(%0) \n"
-        "sw s11, 104(%0) \n"
-        "sw t3, 108(%0) \n"
-        "sw t4, 112(%0) \n"
-        "sw t5, 116(%0) \n"
-        "sw t6, 120(%0) \n"
-        "csrr t0, mepc \n"
-        "sw t0, 124(%0) \n"
-        :
-        : "r"(ctx)
-        : "memory"
-    );
-}
+typedef struct task_listnode {
+    task_struct task;
+    struct task_listnode *prev;
+    struct task_listnode *next;
+} task_listnode;
+
+typedef struct {
+	uint32_t count;
+    task_listnode *head;
+    task_listnode *tail;
+} task_linkedlist;
+
+
+task_linkedlist *initLinkedList();
+void addHead(task_linkedlist *list, task_struct task);
+void addTail(task_linkedlist *list, task_struct task);
+void addAtIndex(task_linkedlist *list, task_struct task, int index);
+task_struct removeHead(task_linkedlist *list);
+task_struct removeTail(task_linkedlist *list);
+task_struct removeByPid(task_linkedlist *list, uint32_t pid);
+
+task_listnode *findByPid(task_linkedlist *list, uint32_t pid);
+task_listnode *findByIndex(task_linkedlist *list, int index);
 
 void sched_init();
 void schedule();
