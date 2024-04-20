@@ -16,7 +16,10 @@ struct context ctx_tasks[MAX_TASKS];
 task_linkedlist* ready_task;
 // 当前进行
 task_struct cur_task = {.pid = -1};
-
+// 是否由进程执行完毕而触发的sched
+uint8_t is_end = 0;
+// 全局pid号
+uint32_t gpid = 0;
 /*
  * _top is used to mark the max available position of ctx_tasks
  * _current is used to point to the context of current task
@@ -41,6 +44,7 @@ void sched_init()
  */
 void schedule()
 {
+	
 	if (_top <= 0) {
 		panic("Num of task should be greater than zero!");
 		return;
@@ -51,6 +55,7 @@ void schedule()
 	if (cur_task.pid == -1)
 	{
 		//cur_task = removeHead(ready_task);
+		_top--;
 		goto sw;
 	}
 	// 判断时间片是否耗尽
@@ -58,18 +63,28 @@ void schedule()
 	if (cur_task.counter <= 0)
 		goto sw;
 	
+	// 还有一种可能会触发sched，即当有进程执行结束返回了
+	// 该类情况有个特点，就是在返回时虽然在ready_task里删除了自己，但是_top的数量没剪
+	// 所以只要判断_top是否比ready_task.count多1即可
+	if (is_end == 1)
+	{
+		goto sw;
+	}
+
 	return;
 	
 sw:
-	// 先保存当前的寄存器数据到tss中
-	// save_context(&(cur_task.tss));
-
-	//_current = (_current + 1) % _top;
-	//cur_task = ready_task[_current];
-
 	// 首先保存当前上下文
 	if (cur_task.pid != -1)
 		addTail(ready_task, cur_task);
+	
+	// 对因程序结束而触发sched的特殊处理
+	if (is_end == 1)
+	{
+		removeTail(ready_task);
+		is_end = 0;
+	}
+
 	// 从队列首部移出一个上下文用以切换
 	cur_task = removeHead(ready_task);
 	cur_task.counter = 5;
@@ -79,25 +94,6 @@ sw:
 	switch_to(next);
 }
 
-/*
- * DESCRIPTION
- * 	Create a task.
- * 	- start_routin: task routine entry
- * RETURN VALUE
- * 	0: success
- * 	-1: if error occured
- */
-// int task_create(void (*start_routin)(void))
-// {
-// 	if (_top < MAX_TASKS) {
-// 		ctx_tasks[_top].sp = (reg_t) &task_stack[_top][STACK_SIZE];
-// 		ctx_tasks[_top].pc = (reg_t) start_routin;
-// 		_top++;
-// 		return 0;
-// 	} else {
-// 		return -1;
-// 	}
-// }
 
 /*
  * DESCRIPTION
@@ -120,16 +116,21 @@ void task_delay(volatile int count)
 	while (count--);
 }
 
-static void task_loader(task_struct task, int argc, char **argv)
+static void task_loader(task_struct* task, int argc, char **argv)
 {
 	// 调用被加载的函数
-	int retvalue = ((int (*)(int, char **))(task.tss.pc))(argc, argv);
+	int retvalue = ((int (*)(int, char **))(task->start_pc))(argc, argv);
 
 	// 进程执行完后，先删除在ready队列中删除进程
-	removeByPid(ready_task, task.pid);
+	//removeByPid(ready_task, task->pid);
+	is_end = 1;
 	// 再返回到sched函数，进行进程切换
-	asm volatile("mv x1, %0"::"r"(schedule));
-	return;
+    // 需要使用systemcall来调用sched，因为sched是一个内核态函数
+    extern void sysendsched();
+    sysendsched();
+
+	// asm volatile("mv x1, %0"::"r"(schedule));
+	// asm volatile("ret"::);
 }
 
 static int progress0(int argc, char **argv)
@@ -178,50 +179,64 @@ static int progress1(int argc, char **argv)
 	return 1;
 }
 
+int task_create(void* start_routin, uint32_t counter, uint32_t priority, uint32_t tty, uint32_t father, int argc, char **argv)
+{
+	task_struct* task0 = (task_struct*)byte_alloc(sizeof(task_struct*));
+    task0->pid = gpid++;
+    task0->counter = counter;
+    task0->exit_code = 0;
+    task0->father = father;
+    task0->priority = priority;
+    task0->state = 0;
+    task0->tty = tty;
+	task0->start_pc = start_routin;
+    task0->tss.sp = byte_alloc(1024);
+    task0->tss.pc = task_loader;
+    // a0会被switch写到实际的寄存器中，随后pc跳转到task_loader，此时会将a0作为第一个参数
+	task0->tss.a0 = task0;
+    task0->tss.a1 = argc;
+    task0->tss.a2 = argv;
+	addTail(ready_task, *task0);
+	_top++;
+}
+
 // 初始化进程，目前是创建0号进程
 void init_progress()
 {
     task_struct* task0 = (task_struct*)byte_alloc(sizeof(task_struct*));
-    task0->pid = 0;
+    task0->pid = gpid++;
     task0->counter = 5;
     task0->exit_code = 0;
     task0->father = -1;
     task0->priority = 0;
     task0->state = 0;
     task0->tty = 0;
+	task0->start_pc = progress0;
     task0->tss.sp = byte_alloc(1024);
-    task0->tss.pc = progress0;
-	//ready_task[_top] = *task0;
+    task0->tss.pc = task_loader;
+    // a0会被switch写到实际的寄存器中，随后pc跳转到task_loader，此时会将a0作为第一个参数
+	task0->tss.a0 = task0;
 	addTail(ready_task, *task0);
 	_top++;
 
 
 	task_struct* task01 = (task_struct*)byte_alloc(sizeof(task_struct*));
-    task01->pid = 1;
+    task01->pid = gpid++;
     task01->counter = 5;
     task01->exit_code = 0;
     task01->father = -1;
     task01->priority = 0;
     task01->state = 0;
     task01->tty = 0;
+	task01->start_pc = progress1;
     task01->tss.sp = byte_alloc(1024);
-    task01->tss.pc = progress1;
-	//ready_task[_top] = *task01;
+    task01->tss.pc = task_loader;
+	task01->tss.a0 = task01;
 	addTail(ready_task, *task01);
 	_top++;
 }
 
-int task_create(void* start_routin, uint32_t counter, uint32_t priority, uint32_t tty, uint32_t father)
-{
-	if (_top < MAX_TASKS) {
-		ctx_tasks[_top].sp = byte_alloc(1024);
-		ctx_tasks[_top].pc = start_routin;
-		_top++;
-		return 0;
-	} else {
-		return -1;
-	}
-}
+
 
 task_linkedlist *initLinkedList() {
     task_linkedlist *list = (task_linkedlist *)byte_alloc(sizeof(task_linkedlist));

@@ -23,6 +23,9 @@ void do_syscall(struct context *cxt)
 		char* str = cxt->a0;
 		uart_puts(str);
 		break;
+	case SYS_endsched:
+		schedule();
+		break;
 	default:
 		printf("Unknown syscall no: %d\n", syscall_num);
 		cxt->a0 = -1;

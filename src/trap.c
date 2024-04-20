@@ -90,6 +90,7 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 		case 2:
 			uart_puts("Illegal instruction\n");
 			printf("virtual addr: %d\n", r_stval());
+			panic("OOPS! What can I do!");
 			break;
 		default:
 			panic("OOPS! What can I do!");

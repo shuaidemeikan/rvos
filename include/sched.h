@@ -54,6 +54,7 @@ typedef struct _task_struct
 {
 	struct context tss;     // 进程的寄存器信息
     uint32_t state;          // 0就绪，1正在运行，2阻塞
+	void* start_pc;			// 进程的入口地址
     uint32_t counter;       // 时间片计数
     uint32_t priority;      // 优先级
     uint32_t exit_code;     // 进程执行停止的退出码，父进程会取
