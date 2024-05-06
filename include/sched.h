@@ -7,6 +7,7 @@
 #include "page.h"
 #include "virtmem.h"
 #include "rvtime.h"
+#include "rand.h"
 
 #define MAX_TASKS 10
 #define STACK_SIZE 1024

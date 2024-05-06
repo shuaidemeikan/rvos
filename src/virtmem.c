@@ -101,24 +101,30 @@ void alloc_secpage(mempage *firstpage, uint32_t target_addr)
     }
 
     // 创建对应的二级页表，并复制一级页表对应的二级页表
-    mempage *new_secpage = (mempage *)page_alloc(32);
-    for (int i = 0; i < 1024; i++) {
-        new_secpage[i].PPN = firstpage[page_index * 1024 + i].PPN;
-        new_secpage[i].V = firstpage[page_index * 1024 + i].V;
-        new_secpage[i].R = firstpage[page_index * 1024 + i].R;
-        new_secpage[i].W = firstpage[page_index * 1024 + i].W;
-        new_secpage[i].X = firstpage[page_index * 1024 + i].X;
-        new_secpage[i].U = firstpage[page_index * 1024 + i].U;
-        new_secpage[i].G = firstpage[page_index * 1024 + i].G;
-        new_secpage[i].A = firstpage[page_index * 1024 + i].A;
-        new_secpage[i].D = firstpage[page_index * 1024 + i].D;
-        new_secpage[i].RSW = firstpage[page_index * 1024 + i].RSW;
-    }
+    // mempage *new_secpage = (mempage *)page_alloc(32);
+    // for (int i = 0; i < 1024; i++) {
+    //     new_secpage[i].PPN = firstpage[page_index * 1024 + i].PPN;
+    //     new_secpage[i].V = firstpage[page_index * 1024 + i].V;
+    //     new_secpage[i].R = 1;
+    //     new_secpage[i].W = 1;
+    //     new_secpage[i].X = 1;
+    //     new_secpage[i].U = firstpage[page_index * 1024 + i].U;
+    //     new_secpage[i].G = firstpage[page_index * 1024 + i].G;
+    //     new_secpage[i].A = firstpage[page_index * 1024 + i].A;
+    //     new_secpage[i].D = firstpage[page_index * 1024 + i].D;
+    //     new_secpage[i].RSW = firstpage[page_index * 1024 + i].RSW;
+    // }
 
     // 修改一级页表的读写执行权限为0
     firstpage[page_index].W = 0;
     firstpage[page_index].R = 0;
     firstpage[page_index].X = 0;
+
+    // 将新创建的二级页表绑定到一级页表上
+    //firstpage[page_index].PPN = (uint32_t)new_secpage / 4096;
+
+    // 刷新TLB
+    asm volatile ("sfence.vma");
 }
 
 // 以下代码是更精细的写时复制，但是问题在于我没有实现字节级别的内存分配器

@@ -90,6 +90,8 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 		// 由于页表采用了写时复制的方式，所以如果出现下面三种异常，那八成是页表写时复制的原因
 		// 需要新建一个二级页表的映射到这里，随后更改一级页表的权限
 		case 12:
+		// mtval是缺页的目标地址，mepc是缺页发生的地址
+			extern task_struct cur_task;
 			uart_puts("Instruction page fault\n");
 			printf("virtual addr: %d\n", r_stval());
 			printf("sepc = : %d\n", r_sepc());
@@ -100,10 +102,8 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 		case 15:
 			uart_puts("Store/AMO access fault\n");
 			printf("virtual addr: %x, %x\n", r_mtval(), r_mepc());
-			//panic("OOPS! What can I do!");
-			extern task_struct cur_task;
+			//panic("OOPS! What can I do!");	
 			alloc_secpage(cur_task.page, r_mtval());
-
 			break;
 		default:
 			uart_puts("unknow exception\n");

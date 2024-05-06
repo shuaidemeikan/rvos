@@ -7,6 +7,9 @@ extern void switch_to(struct context *next);
 // 0号进程的页表，后续所有进程的页表都来自于该页表的写时复制
 extern mempage *task0_firstpage;
 
+// shell进程的进程号
+uint32_t shell_pid;
+
 /*
  * In the standard RISC-V calling convention, the stack pointer sp
  * is always 16-byte aligned.
@@ -47,7 +50,10 @@ void sched_init()
  */
 void schedule()
 {
-	
+    // 每次发生调度时，我们先重新生成一个随机数
+    // 这和调度程序无关，只是为了确保每次获取的随机数足够随机
+    rand_gen();
+
 	if (_top <= 0) {
 		panic("Num of task should be greater than zero!");
 		return;
@@ -111,6 +117,22 @@ sw:
 		is_end = 0;
 	}
 
+    // 对shell调用了quit后出发的sched的特殊处理
+    extern uint8_t other_end;
+    if (other_end == 1)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            // 移除所有除了shell的进程
+            task_struct tmp = removeHead(ready_task);
+            if (tmp.pid == shell_pid)
+            {
+                addTail(ready_task, cur_task);
+            }
+        }
+        other_end = 0;
+    }
+
 	// 从队列首部移出一个上下文用以切换
 	cur_task = removeHead(ready_task);
     // 不调度处于因延迟函数而阻塞的进程
@@ -151,7 +173,7 @@ void task_yield()
  */
 void task_delay(volatile int count)
 {
-	count *= 50000;
+	count *= 16666;
 	while (count--);
 }
 
@@ -170,6 +192,14 @@ static void task_loader(task_struct* task, int argc, char **argv)
 
 	// asm volatile("mv x1, %0"::"r"(schedule));
 	// asm volatile("ret"::);
+}
+
+static int Genesis(int argc, char **argv)
+{
+    while(1)
+    {
+        task_delay(4000);
+    }
 }
 
 static int progress0(int argc, char **argv)
@@ -196,6 +226,7 @@ static int progress0(int argc, char **argv)
 
 int progress1(int argc, char **argv)
 {
+    printf("size: %d", sizeof(struct context));
     int* a = 0x87000000; 
     *a = 1;
    	//while (1)
@@ -263,7 +294,9 @@ void init_progress()
 	// _top++;
 	extern int shell_loop(int argc, char **argv);
     extern int shell_test(int argc, char **argv);
+    task_create(Genesis, 5, 0, 0, -1, 0, NULL);
     task_create(shell_loop, 5, 0, 0, -1, 0, NULL);
+    shell_pid = 1;
 
 
 	// task_struct* task01 = (task_struct*)page_alloc(sizeof(task_struct*));

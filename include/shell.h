@@ -1,8 +1,10 @@
 #ifndef SHELL_H
 #define SHELL_H
 
+#include "game.h"
 #include "stdio.h"
 #include "memtools.h"
+
 
 #define COMMAND(op_size, opfun, str)     size = 0;\
     args = tmp;\

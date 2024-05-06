@@ -16,6 +16,7 @@ extern void virtio_init();
 extern void byte_test();
 extern void mempage_init();
 extern void stdio_init();
+extern void rand_init();
 
 uint32_t curr_pri = 11;
 
@@ -28,6 +29,9 @@ void start_kernel(void)
 {
 	uart_init();
 	uart_puts("Hello, RVOS!\n");
+
+	rand_init();
+
 	virtio_init();
 	page_init();
 
