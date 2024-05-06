@@ -26,6 +26,9 @@ void do_syscall(struct context *cxt)
 	case SYS_endsched:
 		schedule();
 		break;
+	case SYS_timedelay:
+		timer_delay(cxt->a0);
+		break;
 	default:
 		printf("Unknown syscall no: %d\n", syscall_num);
 		cxt->a0 = -1;

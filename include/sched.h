@@ -6,6 +6,7 @@
 #include "platform.h"
 #include "page.h"
 #include "virtmem.h"
+#include "rvtime.h"
 
 #define MAX_TASKS 10
 #define STACK_SIZE 1024
@@ -53,7 +54,8 @@ struct context {
 typedef struct _task_struct
 {
 	struct context tss;     // 进程的寄存器信息
-    uint32_t state;          // 0就绪，1正在运行，2阻塞
+    uint32_t state;          // 0就绪，1因调用了延迟函数在等待
+	int delay_time;			// -1为不等，其他为等待的时间
 	void* start_pc;			// 进程的入口地址
     uint32_t counter;       // 时间片计数
     uint32_t priority;      // 优先级

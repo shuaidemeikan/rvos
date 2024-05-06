@@ -8,6 +8,8 @@
 #include "riscv.h"
 #include "plic.h"
 #include "sched.h"
+#include "virtmem.h"
+#include "uart.h"
 
 void trap_init();
 void external_interrupt_handler();

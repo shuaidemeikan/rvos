@@ -1,8 +1,11 @@
 #include "sched.h"
-
+#include "platform.h"
 
 /* defined in entry.S */
 extern void switch_to(struct context *next);
+
+// 0号进程的页表，后续所有进程的页表都来自于该页表的写时复制
+extern mempage *task0_firstpage;
 
 /*
  * In the standard RISC-V calling convention, the stack pointer sp
@@ -71,10 +74,33 @@ void schedule()
 		goto sw;
 	}
 
+    // 当进程调用了延迟类函数时，会将进程的状态阻塞，然后等待延迟结束，此时当然也要切
+    if (cur_task.state == 1)
+        goto sw;
+
 	return;
 	
 sw:
-	// 首先保存当前上下文
+    // 首先遍历进程，将延迟结束的进程状态改为就绪
+    task_listnode *temp = ready_task->head;
+    extern uint32_t last_sched_time;
+    while (temp) {
+        if (temp->task.state == 1)
+        // 当前进程处于因延迟函数造成的阻塞态，减去上次调度到现在的时间
+        // 如果等待时间已经超过了延迟时间，就将进程状态改为就绪态
+        {
+            temp->task.delay_time -= last_sched_time;
+            last_sched_time = 0;
+            if (temp->task.delay_time <= 0) {
+                temp->task.state = 0;
+                temp->task.delay_time = -1;
+            }
+        }
+        temp = temp->next;
+    }
+
+
+	// 保存当前上下文
 	if (cur_task.pid != -1)
 		addTail(ready_task, cur_task);
 	
@@ -87,10 +113,23 @@ sw:
 
 	// 从队列首部移出一个上下文用以切换
 	cur_task = removeHead(ready_task);
+    // 不调度处于因延迟函数而阻塞的进程
+    while (cur_task.state == 1)
+    {
+        addTail(ready_task, cur_task);
+        cur_task = removeHead(ready_task);
+    }
+
 	cur_task.counter = 5;
 	struct context *next = &(cur_task.tss);
 	extern int curr_pri;
 	curr_pri = 01;
+    if (cur_task.pid != 0)
+    {
+        reg_t tmp = 0;
+        tmp = tmp | 1U << 31 | ((((uint32_t)cur_task.page - 2048) / 4096) & 0x3FFFFF);
+        w_satp(tmp);
+    }
 	switch_to(next);
 }
 
@@ -155,33 +194,32 @@ static int progress0(int argc, char **argv)
 	return 1;
 }
 
-static int progress1(int argc, char **argv)
+int progress1(int argc, char **argv)
 {
+    int* a = 0x87000000; 
+    *a = 1;
    	//while (1)
 	{
 		printf("hello1 progress1\n");
 		task_delay(4000);
+        //usleep(10000);
 		printf("hello2 progress1\n");
 		task_delay(4000);
-		printf("hello3 progress1\n");
+        //usleep(10000);
+        printf("hello3 progress1\n");
 		task_delay(4000);
+        //usleep(10000);
 		printf("hello4 progress1\n");
 		task_delay(4000);
-		printf("hello5 progress1\n");
-		task_delay(4000);
-		printf("hello6 progress1\n");
-		task_delay(4000);
-		printf("hello7 progress1\n");
-		task_delay(4000);
-		printf("hello8 progress1\n");
-		task_delay(4000);
+        //usleep(10000);
 	}
+    //page_free(a);
 	return 1;
 }
 
 int task_create(void* start_routin, uint32_t counter, uint32_t priority, uint32_t tty, uint32_t father, int argc, char **argv)
 {
-	task_struct* task0 = (task_struct*)byte_alloc(sizeof(task_struct*));
+	task_struct* task0 = (task_struct*)page_alloc(sizeof(task_struct*));
     task0->pid = gpid++;
     task0->counter = counter;
     task0->exit_code = 0;
@@ -189,13 +227,18 @@ int task_create(void* start_routin, uint32_t counter, uint32_t priority, uint32_
     task0->priority = priority;
     task0->state = 0;
     task0->tty = tty;
+    task0->delay_time = -1;
 	task0->start_pc = start_routin;
-    task0->tss.sp = byte_alloc(1024);
+    task0->tss.sp = page_alloc(1024);
     task0->tss.pc = task_loader;
     // a0会被switch写到实际的寄存器中，随后pc跳转到task_loader，此时会将a0作为第一个参数
 	task0->tss.a0 = task0;
     task0->tss.a1 = argc;
     task0->tss.a2 = argv;
+    if(task0->pid != 0)
+        task0->page = fork_mempage(task0_firstpage, task_loader);
+    else
+        task0->page = task0_firstpage;
 	addTail(ready_task, *task0);
 	_top++;
 }
@@ -203,43 +246,48 @@ int task_create(void* start_routin, uint32_t counter, uint32_t priority, uint32_
 // 初始化进程，目前是创建0号进程
 void init_progress()
 {
-    task_struct* task0 = (task_struct*)byte_alloc(sizeof(task_struct*));
-    task0->pid = gpid++;
-    task0->counter = 5;
-    task0->exit_code = 0;
-    task0->father = -1;
-    task0->priority = 0;
-    task0->state = 0;
-    task0->tty = 0;
-	task0->start_pc = progress0;
-    task0->tss.sp = byte_alloc(1024);
-    task0->tss.pc = task_loader;
-    // a0会被switch写到实际的寄存器中，随后pc跳转到task_loader，此时会将a0作为第一个参数
-	task0->tss.a0 = task0;
-	addTail(ready_task, *task0);
-	_top++;
+    // task_struct* task0 = (task_struct*)page_alloc(sizeof(task_struct*));
+    // task0->pid = gpid++;
+    // task0->counter = 5;
+    // task0->exit_code = 0;
+    // task0->father = -1;
+    // task0->priority = 0;
+    // task0->state = 0;
+    // task0->tty = 0;
+	// task0->start_pc = progress0;
+    // task0->tss.sp = page_alloc(1024);
+    // task0->tss.pc = task_loader;
+    // // a0会被switch写到实际的寄存器中，随后pc跳转到task_loader，此时会将a0作为第一个参数
+	// task0->tss.a0 = task0;
+	// addTail(ready_task, *task0);
+	// _top++;
+	extern int shell_loop(int argc, char **argv);
+    extern int shell_test(int argc, char **argv);
+    task_create(shell_loop, 5, 0, 0, -1, 0, NULL);
 
 
-	task_struct* task01 = (task_struct*)byte_alloc(sizeof(task_struct*));
-    task01->pid = gpid++;
-    task01->counter = 5;
-    task01->exit_code = 0;
-    task01->father = -1;
-    task01->priority = 0;
-    task01->state = 0;
-    task01->tty = 0;
-	task01->start_pc = progress1;
-    task01->tss.sp = byte_alloc(1024);
-    task01->tss.pc = task_loader;
-	task01->tss.a0 = task01;
-	addTail(ready_task, *task01);
-	_top++;
+	// task_struct* task01 = (task_struct*)page_alloc(sizeof(task_struct*));
+    // task01->pid = gpid++;
+    // task01->counter = 5;
+    // task01->exit_code = 0;
+    // task01->father = -1;
+    // task01->priority = 0;
+    // task01->state = 0;
+    // task01->tty = 0;
+	// task01->start_pc = progress1;
+    // task01->tss.sp = page_alloc(1024);
+    // task01->tss.pc = task_loader;
+	// task01->tss.a0 = task01;
+	// addTail(ready_task, *task01);
+	// _top++;
+    task_create(progress1, 5, 0, 0, -1, 0, NULL);
+    //task_create(progress0, 5, 0, 0, -1, 0, NULL);
 }
 
 
 
 task_linkedlist *initLinkedList() {
-    task_linkedlist *list = (task_linkedlist *)byte_alloc(sizeof(task_linkedlist));
+    task_linkedlist *list = (task_linkedlist *)page_alloc(sizeof(task_linkedlist));
     if (list) {
         list->head = NULL;
         list->tail = NULL;
@@ -249,7 +297,7 @@ task_linkedlist *initLinkedList() {
 }
 
 void addHead(task_linkedlist *list, task_struct task) {
-    task_listnode *node = (task_listnode *)byte_alloc(sizeof(task_listnode));
+    task_listnode *node = (task_listnode *)page_alloc(sizeof(task_listnode));
     if (node) {
         node->task = task;
         node->prev = NULL;
@@ -265,7 +313,7 @@ void addHead(task_linkedlist *list, task_struct task) {
 }
 
 void addTail(task_linkedlist *list, task_struct task) {
-    task_listnode *node = (task_listnode *)byte_alloc(sizeof(task_listnode));
+    task_listnode *node = (task_listnode *)page_alloc(sizeof(task_listnode));
     if (node) {
         node->task = task;
         node->next = NULL;
@@ -292,7 +340,7 @@ void addAtIndex(task_linkedlist *list, task_struct task, int index) {
     if (temp == NULL || temp->next == NULL && index > 0) {
         addTail(list, task);
     } else {
-        task_listnode *node = (task_listnode *)byte_alloc(sizeof(task_listnode));
+        task_listnode *node = (task_listnode *)page_alloc(sizeof(task_listnode));
         if (node) {
             node->task = task;
             node->prev = temp;
@@ -313,7 +361,7 @@ void addAtIndex(task_linkedlist *list, task_struct task, int index) {
 //         } else {
 //             list->tail = NULL;
 //         }
-//         byte_free(temp);
+//         page_free(temp);
 // 		list->count--;
 //     }
 // }
@@ -327,7 +375,7 @@ void addAtIndex(task_linkedlist *list, task_struct task, int index) {
 //         } else {
 //             list->head = NULL;
 //         }
-//         byte_free(temp);
+//         page_free(temp);
 // 		list->count--;
 //     }
 // }
@@ -346,7 +394,7 @@ void addAtIndex(task_linkedlist *list, task_struct task, int index) {
 //             } else {
 //                 list->tail = temp->prev;
 //             }
-//             byte_free(temp);
+//             page_free(temp);
 // 			list->count--;
 //             return;
 //         }
@@ -365,7 +413,7 @@ task_struct removeHead(task_linkedlist *list) {
         } else {
             list->tail = NULL;
         }
-        byte_free(temp);
+        page_free(temp);
 		list->count--;
     }
     return result;
@@ -382,7 +430,7 @@ task_struct removeTail(task_linkedlist *list) {
         } else {
             list->head = NULL;
         }
-        byte_free(temp);
+        page_free(temp);
 		list->count--;
     }
     return result;
@@ -404,7 +452,7 @@ task_struct removeByPid(task_linkedlist *list, uint32_t pid) {
             } else {
                 list->tail = temp->prev;
             }
-            byte_free(temp);
+            page_free(temp);
 			list->count--;
             return result;
         }

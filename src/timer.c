@@ -9,6 +9,10 @@ static uint32_t _tick = 0;
 
 static struct timer timer_list[MAX_TIMER];
 
+// 用以保存距离上次调用sched过去了多长时间
+// 方便sched中判断在等待延迟的进程已经延迟了多长时间
+uint32_t last_sched_time = 0;
+
 /* load timer interval(in ticks) for next timer interrupt.*/
 void timer_load(int interval)
 {
@@ -108,7 +112,9 @@ static inline void timer_check()
 void timer_handler() 
 {
 	_tick++;
-	printf("tick: %d\n", _tick);
+	//printf("tick: %d\n", _tick);
+
+	last_sched_time += CLINT_TIMEBASE_FREQ;
 
 	timer_check();
 

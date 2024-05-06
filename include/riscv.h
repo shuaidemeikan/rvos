@@ -82,6 +82,13 @@ static inline reg_t r_stval()
 	return x;
 }
 
+static inline reg_t r_mtval()
+{
+	reg_t x;
+	asm volatile("csrr %0, mtval" : "=r" (x));
+	return x;
+}
+
 static inline reg_t r_sepc()
 {
 	reg_t x;

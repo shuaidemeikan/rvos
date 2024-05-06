@@ -57,11 +57,11 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 
 			break;
 		case 7:
-			uart_puts("timer interruption!\n");
+			//uart_puts("timer interruption!\n");
 			timer_handler();
 			break;
 		case 11:
-			uart_puts("external interruption!\n");
+		//	uart_puts("external interruption!\n");
 			external_interrupt_handler();
 			break;
 		default:
@@ -82,17 +82,31 @@ reg_t trap_handler(reg_t epc, reg_t cause, struct context *cxt)
 			do_syscall(cxt);
 			return_pc += 4;
 			break;
-		case 12:
-			uart_puts("Instruction page fault\n");
-			printf("virtual addr: %d\n", r_stval());
-			printf("sepc = : %d\n", r_sepc());	
-			break;
 		case 2:
 			uart_puts("Illegal instruction\n");
 			printf("virtual addr: %d\n", r_stval());
 			panic("OOPS! What can I do!");
 			break;
+		// 由于页表采用了写时复制的方式，所以如果出现下面三种异常，那八成是页表写时复制的原因
+		// 需要新建一个二级页表的映射到这里，随后更改一级页表的权限
+		case 12:
+			uart_puts("Instruction page fault\n");
+			printf("virtual addr: %d\n", r_stval());
+			printf("sepc = : %d\n", r_sepc());
+		case 13:
+			uart_puts("Load access fault\n");
+			printf("virtual addr: %d\n", r_stval());
+			printf("sepc = : %d\n", r_sepc());
+		case 15:
+			uart_puts("Store/AMO access fault\n");
+			printf("virtual addr: %x, %x\n", r_mtval(), r_mepc());
+			//panic("OOPS! What can I do!");
+			extern task_struct cur_task;
+			alloc_secpage(cur_task.page, r_mtval());
+
+			break;
 		default:
+			uart_puts("unknow exception\n");
 			panic("OOPS! What can I do!");
 			//return_pc += 4;
 		}

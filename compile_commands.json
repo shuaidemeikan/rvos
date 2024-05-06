@@ -1,0 +1,422 @@
+[
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/timer.o",
+            "src/timer.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/timer.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/printf.o",
+            "src/printf.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/printf.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/page.o",
+            "src/page.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/page.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/syscall.o",
+            "src/syscall.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/syscall.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/virtio.o",
+            "src/virtio.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/virtio.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "asm/entry.o",
+            "asm/entry.S"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "asm/entry.S"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/blk.o",
+            "src/blk.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/blk.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/trap.o",
+            "src/trap.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/trap.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/memtools.o",
+            "src/memtools.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/memtools.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/user.o",
+            "src/user.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/user.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/virtmem.o",
+            "src/virtmem.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/virtmem.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/plic.o",
+            "src/plic.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/plic.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/kernel.o",
+            "src/kernel.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/kernel.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "asm/start.o",
+            "asm/start.S"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "asm/start.S"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/sched.o",
+            "src/sched.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/sched.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "asm/mem.o",
+            "asm/mem.S"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "asm/mem.S"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/uart.o",
+            "src/uart.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/uart.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/stdio.o",
+            "src/stdio.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/stdio.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/lock.o",
+            "src/lock.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/lock.c"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "asm/usys.o",
+            "asm/usys.S"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "asm/usys.S"
+    },
+    {
+        "arguments": [
+            "riscv64-unknown-elf-gcc",
+            "-c",
+            "-nostdlib",
+            "-fno-builtin",
+            "-march=rv32g",
+            "-mabi=ilp32",
+            "-g",
+            "-Wall",
+            "-D",
+            "CONFIG_SYSCALL",
+            "-Iinclude",
+            "-o",
+            "src/shell.o",
+            "src/shell.c"
+        ],
+        "directory": "/home/zbc/riscv32os/work",
+        "file": "src/shell.c"
+    }
+]

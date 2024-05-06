@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include "lock.h"
 #include "printf.h"
+#include "uart.h"
 
 #define TIMER_INTERVAL CLINT_TIMEBASE_FREQ
 #define MAX_TIMER 10

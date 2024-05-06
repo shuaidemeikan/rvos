@@ -6,17 +6,17 @@ void* memcpy(void* ptr1, const void* ptr2, size_t len)
     return ptr1;
 }
 
-int memcmp(const void *ptr1, const void *ptr2, size_t num)
-{
-    for (int i = 0; i < num; i++)
-    {
-        if (((char*)ptr1)[i] < ((char*)ptr2)[i])
-            return -1;
-        else if(((char*)ptr1)[i] > ((char*)ptr2)[i])
-            return 1;
-    }
-    return 0;
+int memcmp(const void *s1, const void *s2, size_t n) {
+  for (int i = 0; i < n; i++)
+  {
+    if (((char*)s1)[i] < ((char*)s2)[i])
+      return -1;
+    else if(((char*)s1)[i] > ((char*)s2)[i])
+       return 1;
+  }
+  return 0;
 }
+
 
 void* memset(void *s, int c, size_t n)
 {

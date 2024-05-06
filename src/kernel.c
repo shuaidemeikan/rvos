@@ -15,6 +15,7 @@ extern void timer_init(void);
 extern void virtio_init();
 extern void byte_test();
 extern void mempage_init();
+extern void stdio_init();
 
 uint32_t curr_pri = 11;
 
@@ -35,6 +36,8 @@ void start_kernel(void)
 	plic_init();
 
 	timer_init();
+
+	stdio_init();
 
 	sched_init();
 

@@ -28,5 +28,6 @@ typedef struct _mempage
 void mempage_init();
 mempage *fork_mempage(mempage *src_firstpage, void* func_addr);
 void set_mempage(mempage *page);
+void alloc_secpage(mempage *firstpage, uint32_t target_addr);
 
 #endif 

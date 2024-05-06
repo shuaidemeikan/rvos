@@ -20,7 +20,11 @@
         "*.tcc": "c",
         "cstdlib": "c",
         "memory": "c",
-        "new": "c"
+        "new": "c",
+        "uart.h": "c",
+        "lock.h": "c",
+        "stdio.h": "c",
+        "shell.h": "c"
     },
     "cmake.configureOnOpen": true
 }
