@@ -31,25 +31,25 @@ void rvcreate(char *args)
 		progress1(0, NULL);	
 	}
 
-	// if (memcmp(args, "pab", 3) == 0)
-	// {
-	// 	printaandb();	
-	// }
+	if (memcmp(args, "pab", 3) == 0)
+	{
+		printaandb();	
+	}
 
-	// if (memcmp(args, "hanoi", 5) == 0)
-	// {
-	// 	hanoi();	
-	// }
+	if (memcmp(args, "hanoi", 5) == 0)
+	{
+		hanoi();	
+	}
 
-	// if (memcmp(args, "life", 4) == 0)
-	// {
-	// 	game_of_life();	
-	// }	
+	if (memcmp(args, "life", 4) == 0)
+	{
+		game_of_life();	
+	}	
 
-	// if (memcmp(args, "tian", 4) == 0)
-	// {
-	// 	donut();	
-	// }		
+	if (memcmp(args, "tian", 4) == 0)
+	{
+		donut();	
+	}		
 }
 
 void bgcreate(char *args)

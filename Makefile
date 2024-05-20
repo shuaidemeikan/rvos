@@ -3,7 +3,7 @@ include ./assist_file/common.mk
 SYSCALL = y
 
 ifeq (${SYSCALL}, y)
-CFLAGS += -D CONFIG_SYSCALL
+CFLAGS += -D CONFIG_SYSCALL -w
 endif
 SRCS_ASM= $(wildcard asm/*.S)
 SRCS_C = $(wildcard src/*.c)
